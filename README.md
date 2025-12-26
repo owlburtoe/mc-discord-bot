@@ -100,7 +100,8 @@ See example.env for a complete template.
 
 ## Slash Command Usage
 
-### /mc <server> <action>
+###
+In Discord: **/mc** <server> <action>
 
 #### Actions:
 - 📊 Status
