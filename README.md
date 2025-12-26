@@ -1,8 +1,10 @@
 # Crafty Discord Bot
 
-A Discord slash-command bot for querying and controlling Minecraft servers managed by [Crafty Controller](https://gitlab.com/crafty-controller/crafty-4) on Gitlab.
+A Discord slash-command bot for querying and controlling Minecraft servers managed by [Crafty Controller](https://gitlab.com/crafty-controller/crafty-4) on GitLab.
 
 This bot supports multiple servers, role-based permissions, and runs cleanly in Docker.
+
+This project is not affiliated with the Crafty Controller team; it simply uses their public API
 
 ---
 
@@ -24,6 +26,9 @@ This bot supports multiple servers, role-based permissions, and runs cleanly in 
 ## Requirements
 
 - Discord Bot Token
+- Discord bot permissions / scopes
+  - OAuth2 scopes: bot, applications.commands
+  - No privileged intents are required for basic slash-command usage
 - Crafty Controller API Token
 - Crafty Controller URL
 - Python 3.11+ (for local runs) or Docker
