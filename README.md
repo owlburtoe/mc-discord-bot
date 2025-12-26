@@ -34,7 +34,7 @@ Crafty must have API access enabled.
 
 ## Installation
 
-### Option 1 — Docker Compose (recommended)
+### Docker Compose
 
 1. Clone this repository
 
