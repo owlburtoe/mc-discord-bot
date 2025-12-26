@@ -1,0 +1,7 @@
+services:
+  crafty-discord-bot:
+    image: crafty-discord-bot:latest
+    container_name: crafty-discord-bot
+    env_file:
+      - .env
+    restart: unless-stopped
