@@ -126,16 +126,16 @@ Enable by exposing port 8085 in Docker if needed by your orchestrator.
 
 ## Common Issues
 
-Commands not showing up
+### Commands not showing up
 	-	Ensure the bot has application.commands scope
 	-	If using GUILD_ID, the guild must match your server
 	-	Wait a few minutes for global command propagation
 
-“Unknown server”
+### “Unknown server”
 	-	Key/name mismatch between .env and command
 	-	Incorrect server UUID
 
-401 / Crafty API failure
+### 401 / Crafty API failure
 	-	API token invalid
 	-	Crafty URL incorrect
 	-	HTTPS certificate issues if using self-signed certs
