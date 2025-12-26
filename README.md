@@ -103,10 +103,10 @@ See example.env for a complete template.
 ### /mc <server> <action>
 
 #### Actions:
--📊 Status
--▶️ Start
--⏹️ Stop
--🔁 Restart
+- 📊 Status
+- ▶️ Start
+- ⏹️ Stop
+- 🔁 Restart
 
 Server names match the values defined in your environment file.
 
@@ -128,16 +128,16 @@ Enable by exposing port 8085 in Docker if needed by your orchestrator.
 # Common Issues
 
 ## Commands not showing up
--Ensure the bot has application.commands scope
--If using GUILD_ID, the guild must match your server
--Wait a few minutes for global command propagation
+- Ensure the bot has application.commands scope
+- If using GUILD_ID, the guild must match your server
+- Wait a few minutes for global command propagation
 
 ## “Unknown server”
--Key/name mismatch between .env and command
--Incorrect server UUID
+- Key/name mismatch between .env and command
+- Incorrect server UUID
 
 ### 401 / Crafty API failure
--API token invalid
--Crafty URL incorrect
--HTTPS certificate issues if using self-signed certs
+- API token invalid
+- Crafty URL incorrect
+- HTTPS certificate issues if using self-signed certs
 
