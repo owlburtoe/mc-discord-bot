@@ -43,12 +43,18 @@ Crafty must have API access enabled.
    cd crafty-discord-bot
    ```
 2. Copy the example environment file
+   
+   ```bash
    cp example.env .env
+   ```
 
 3. Edit .env and fill in the values (see configuration section below)
 
 4. Start the bot
+
+   ```bash
    (sudo) docker compose up -d --build
+   ```
 
 # Configuration
 
