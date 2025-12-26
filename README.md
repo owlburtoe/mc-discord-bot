@@ -64,17 +64,14 @@ See example.env for a complete template.
 
 ## Discord configuration
 
-**Variable**		**Description**
+| Variable | Description |
+| :---: | :--- |
+| DISCORD_TOKEN | Bot token from Discord Developer Portal |
+| GUILD_ID | Optional: Restrict slash commands to one guild |
+| ALLOWED_CHANNEL_ID | Optional: Channel ID where commands are allowed/wanted |
+| OWNER_ID | Discord user ID with FULL permissions |
+| MOD_ROLE_ID | Role allowed control actions |
 
-DISCORD_TOKEN		Bot token from Discord Developer Portal
-
-GUILD_ID		Optional: restrict slash commands to one guild
-
-ALLOWED_CHANNEL_ID	Optional: channel ID where commands are allowed
-
-OWNER_ID		Discord user ID with full permissions
-
-MOD_ROLE_ID		Role allowed control actions
 		
 ## Crafty Controller configuration
 
