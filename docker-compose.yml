@@ -1,7 +1,42 @@
+networks:
+  backend:
+    driver: bridge
+
 services:
-  crafty-discord-bot:
-    image: crafty-discord-bot:latest
-    container_name: crafty-discord-bot
-    env_file:
-      - .env
+  crafty:
+    container_name: crafty_controller
+    image: registry.gitlab.com/crafty-controller/crafty-4:latest
+    restart: always
+    user: "${PUID}:${PGID}"
+    environment:
+      - TZ=${TZ}
+    ports:
+      - "8443:8443"
+      - "8124:8124"
+      - "19132-19138:19132-19138/udp"
+      - "25500-25600:25500-25600"
+    networks:
+      - backend
+    volumes:
+      - ./crafty/backups:/crafty/backups
+      - ./crafty/logs:/crafty/logs
+      - ./crafty/servers:/crafty/servers
+      - ./crafty/config:/crafty/app/config
+      - ./crafty/import:/crafty/import
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "--no-check-certificate", "https://crafty:8443/api/v2"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  discord-bot:
+    build: ./mc-discord-bot
+    container_name: mc_discord_bot
+    env_file: .env
     restart: unless-stopped
+    networks:
+      - backend
+    volumes:
+      - ./mc-discord-bot:/app
+    ports:
+      - "8085:8080"
