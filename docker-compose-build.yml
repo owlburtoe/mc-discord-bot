@@ -32,11 +32,13 @@ services:
       retries: 5
 
   discord-bot:
+    build: ./mc-discord-bot
     container_name: mc_discord_bot
-    image: owlburtoe/minecraft-crafty-discord-bot:latest
     env_file: .env
     restart: unless-stopped
     networks:
       - backend
+    volumes:
+      - ./mc-discord-bot:/app
     ports:
       - "8085:8080"

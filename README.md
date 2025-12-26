@@ -6,6 +6,8 @@ This bot supports multiple servers, role-based permissions, and runs cleanly in 
 
 This project is not affiliated with the Crafty Controller team; it simply uses their public API
 
+This is a personal project shared publicly. I may not respond to issues or feature requests.
+
 ---
 
 ## Features
@@ -41,25 +43,57 @@ Crafty must have API access enabled.
 
 ## Docker Compose
 
-1. Clone this repository
+### Step 1. Download the required files
 
-   ```bash
-   git clone <repo-url>
-   cd crafty-discord-bot
-   ```
-2. Copy the example environment file
-   
-   ```bash
-   cp example.env .env
-   ```
+Create a folder and go into it:
 
-3. Edit .env and fill in the values (see configuration section below)
+```bash
+mkdir mc-discord-bot
+cd mc-discord-bot
+```
 
-4. Start the bot
+Download the Docker Compose file:
+```bash
+wget -O docker-compose.yml https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/docker-compose.yml
+```
+and 
 
-   ```bash
-   (sudo) docker compose up -d --build
-   ```
+```bash
+wget -O example.env https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/example.env
+```
+Rename the environment file:
+```bash
+mv example.env .env
+```
+
+### Step 2 -- Configure
+
+Open .env in your editor and populate it with your values:
+
+- Discord bot token
+- Crafty URL and token
+- server IDs
+- role / guild IDs (optional)
+
+### Step 3 -- Start the bot
+
+Bring it online:
+
+```bash
+docker compose up -d
+```
+
+To view logs:
+
+```bash
+docker compose logs -f
+```
+## Notes
+
+- You do not edit the container image
+- You update configuration only through .env
+- Recreate the container when .env changes:
+
 
 # Configuration
 
