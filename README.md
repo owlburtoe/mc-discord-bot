@@ -102,7 +102,7 @@ See example.env for a complete template.
 
 ### /mc <server> <action>
 
-Actions:
+#### Actions:
 	-	📊 Status
 	-	▶️ Start
 	-	⏹️ Stop
@@ -123,6 +123,7 @@ Response example:
 
 Enable by exposing port 8085 in Docker if needed by your orchestrator.
 
+---
 
 ## Common Issues
 
