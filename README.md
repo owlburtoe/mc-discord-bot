@@ -4,7 +4,7 @@ A Discord slash-command bot for querying and controlling Minecraft servers manag
 
 This bot supports multiple servers, role-based permissions, and runs cleanly in Docker.
 
-This project is not affiliated with the Crafty Controller team; it simply uses their public API
+This project is not affiliated with the Crafty Controller team; it simply uses their public API.
 
 This is a personal project shared publicly. I may not respond to issues or feature requests.
 
@@ -156,10 +156,12 @@ Server names match the values defined in your environment file.
 
 Response example:
 
+```json
 {
   "status": "ok",
   "servers": 3
 }
+```
 
 Enable by exposing port 8085 in Docker if needed by your orchestrator.
 
