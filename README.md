@@ -75,30 +75,28 @@ See example.env for a complete template.
 		
 ## Crafty Controller configuration
 
-**Variable**		**Configuration**
-
-CRAFTY_URL		Base URL of your Crafty Controller
-
-CRAFTY_TOKEN		API token from Crafty
-
+| Variable | Description |
+| :---: | :--- |
+| CRAFTY_URL | Base URL of your Crafty Controller |
+| CRAFTY_TOKEN | API token made in Crafty |
 
 ## Defining Minecraft servers
 
 ### Servers are mapped by index. Repeat the pattern for multiple servers.
 
-MC_SERVER_<N>_KEY   = short keyword users type
+`MC_SERVER_<N>_KEY   = short keyword users type`
 
-MC_SERVER_<N>_NAME  = pretty name shown in Discord
+`MC_SERVER_<N>_NAME  = pretty name shown in Discord`
 
-MC_SERVER_<N>_ID    = server UUID from Crafty
+`MC_SERVER_<N>_ID    = server UUID from Crafty`
 
 ### Example:
 
-MC_SERVER_1_KEY=surv
+`MC_SERVER_1_KEY=surv`
 
-MC_SERVER_1_NAME=Survival
+`MC_SERVER_1_NAME=Survival`
 
-MC_SERVER_1_ID=00000000-0000-0000-0000-000000000001
+`MC_SERVER_1_ID=00000000-0000-0000-0000-000000000001`
 
 ## Slash Command Usage
 
