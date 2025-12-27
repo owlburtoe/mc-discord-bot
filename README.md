@@ -43,7 +43,7 @@ Crafty must have API access enabled.
 
 ## Docker Compose
 
-### Step 1 —— Download the required files
+### Step 1 — Download the required files
 
 Create a folder and go into it:
 
@@ -66,7 +66,7 @@ Rename the environment file:
 mv example.env .env
 ```
 
-### Step 2 —— Configure
+### Step 2 — Configure
 
 Open .env in your editor and populate it with your values:
 
@@ -75,7 +75,7 @@ Open .env in your editor and populate it with your values:
 - server IDs
 - role / guild IDs (optional)
 
-### Step 3 —— Start the bot
+### Step 3 — Start the bot
 
 Bring it online:
 
