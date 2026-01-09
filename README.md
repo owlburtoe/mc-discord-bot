@@ -70,6 +70,7 @@ mv example.env .env
 
 Open .env in your editor and populate it with your values:
 
+- PUID/GUID (*REQUIRED for Crafty to run!!*)
 - Discord bot token
 - Crafty URL and token
 - server IDs
@@ -82,6 +83,8 @@ Bring it online:
 ```bash
 docker compose up -d
 ```
+- bot won't run right away until all the required variables are entered. Crafty will run as long as PUID/GUID and TZ are entered in the .env
+
 
 To view logs:
 
