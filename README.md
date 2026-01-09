@@ -83,8 +83,7 @@ Bring it online:
 ```bash
 docker compose up -d
 ```
-- bot won't run right away until all the required variables are entered. Crafty will run as long as PUID/GUID and TZ are entered in the .env
-
+*bot won't run right away until all the required variables are entered. Crafty will run as long as PUID/GUID and TZ are entered in the .env*
 
 To view logs:
 
@@ -94,7 +93,7 @@ docker compose logs -f
 
 ### Step 4 - Visit Crafty4
 
-Visit https://HOST_URL:8443 to access the Controller and start your first server!
+- Visit https://localhost:8443 to access the Controller and start your first server!
 
 - Visit [Crafty Controller](https://gitlab.com/crafty-controller/crafty-4) on GitLab for instructions on starting your first server!
 ## Notes
