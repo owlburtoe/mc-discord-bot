@@ -91,6 +91,12 @@ To view logs:
 ```bash
 docker compose logs -f
 ```
+
+### Step 4 - Visit Crafty4
+
+Visit https://HOST_URL:8443 to access the Controller and start your first server!
+
+- Visit [Crafty Controller](https://gitlab.com/crafty-controller/crafty-4) on GitLab for instructions on starting your first server!
 ## Notes
 
 - You do not edit the container image
