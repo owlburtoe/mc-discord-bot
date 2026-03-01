@@ -1,5 +1,6 @@
-from typing import Dict, Optional, List
-from pydantic import Field, validator
+import json
+from typing import Dict, Optional, List, Any
+from pydantic import Field, RootModel
 from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
 
@@ -22,12 +23,36 @@ class Settings(BaseSettings):
 
     log_level: str = Field("INFO", alias="LOG_LEVEL")
     log_json: bool = Field(False, alias="LOG_JSON")
+    
+    servers_file: str = Field("servers.json", alias="SERVERS_FILE")
+    servers_json: Optional[str] = Field(None, alias="MC_SERVERS_JSON")
 
     @property
     def servers(self) -> Dict[str, Dict[str, str]]:
         """
-        Backward compatible server loading from MC_SERVER_N_... pattern.
+        Load server definitions from:
+        1. MC_SERVERS_JSON environment variable
+        2. SERVERS_FILE (default: servers.json)
+        3. Legacy MC_SERVER_N_... pattern
         """
+        # 1. From JSON env var
+        if self.servers_json:
+            try:
+                data = json.loads(self.servers_json)
+                return self._parse_json_list(data)
+            except Exception as e:
+                print(f"Error parsing MC_SERVERS_JSON: {e}")
+
+        # 2. From JSON file
+        if os.path.exists(self.servers_file):
+            try:
+                with open(self.servers_file, "r") as f:
+                    data = json.load(f)
+                    return self._parse_json_list(data)
+            except Exception as e:
+                print(f"Error reading {self.servers_file}: {e}")
+
+        # 3. Legacy pattern
         srvs = {}
         for i in range(1, 21):
             key = os.getenv(f"MC_SERVER_{i}_KEY")
@@ -40,5 +65,19 @@ class Settings(BaseSettings):
                     "id": uuid,
                 }
         return srvs
+
+    def _parse_json_list(self, data: Any) -> Dict[str, Dict[str, str]]:
+        if not isinstance(data, list):
+            raise ValueError("Server configuration must be a list of objects")
+        
+        parsed = {}
+        for item in data:
+            # Validate using Pydantic
+            srv = MinecraftServer(**item)
+            parsed[srv.key.lower()] = {
+                "name": srv.name,
+                "id": srv.id,
+            }
+        return parsed
 
 settings = Settings()

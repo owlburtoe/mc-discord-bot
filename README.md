@@ -53,15 +53,19 @@ cd mc-discord-bot
 ```
 
 Download the Docker Compose file:
+
 ```bash
 wget -O docker-compose.yml https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/docker-compose.yml
 ```
-and 
+
+and
 
 ```bash
 wget -O example.env https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/example.env
 ```
+
 Rename the environment file:
+
 ```bash
 mv example.env .env
 ```
@@ -70,7 +74,7 @@ mv example.env .env
 
 Open .env in your editor and populate it with your values:
 
-- PUID/GUID (*REQUIRED for Crafty to run!!*)
+- PUID/GUID (_REQUIRED for Crafty to run!!_)
 - Discord bot token
 - Crafty URL and token
 - server IDs
@@ -83,7 +87,8 @@ Bring it online:
 ```bash
 docker compose up -d
 ```
-*bot won't run right away until all the required variables are entered. Crafty will run as long as PUID/GUID and TZ are entered in the .env*
+
+_bot won't run right away until all the required variables are entered. Crafty will run as long as PUID/GUID and TZ are entered in the .env_
 
 To view logs:
 
@@ -96,12 +101,12 @@ docker compose logs -f
 - Visit https://localhost:8443 to access the Controller and start your first server!
 
 - Visit [Crafty Controller](https://gitlab.com/crafty-controller/crafty-4) on GitLab for instructions on starting your first server!
+
 ## Notes
 
 - You do not edit the container image
 - You update configuration only through .env
 - Recreate the container when .env changes
-
 
 # Configuration
 
@@ -111,46 +116,66 @@ See example.env for a complete template.
 
 ## Discord configuration
 
-| Variable | Description |
-| :---: | :--- |
-| DISCORD_TOKEN | Bot token from Discord Developer Portal |
-| GUILD_ID | Optional: Restrict slash commands to one guild |
+|      Variable      | Description                                            |
+| :----------------: | :----------------------------------------------------- |
+|   DISCORD_TOKEN    | Bot token from Discord Developer Portal                |
+|      GUILD_ID      | Optional: Restrict slash commands to one guild         |
 | ALLOWED_CHANNEL_ID | Optional: Channel ID where commands are allowed/wanted |
-| OWNER_ID | Discord user ID with FULL permissions |
-| MOD_ROLE_ID | Role allowed control actions |
+|      OWNER_ID      | Discord user ID with FULL permissions                  |
+|    MOD_ROLE_ID     | Role allowed control actions                           |
 
-		
 ## Crafty Controller configuration
 
-| Variable | Description |
-| :---: | :--- |
-| CRAFTY_URL | Base URL of your Crafty Controller |
-| CRAFTY_TOKEN | API token made in Crafty |
+|   Variable   | Description                        |
+| :----------: | :--------------------------------- |
+|  CRAFTY_URL  | Base URL of your Crafty Controller |
+| CRAFTY_TOKEN | API token made in Crafty           |
 
 ## Defining Minecraft servers
 
-### Servers are mapped by index. Repeat the pattern for multiple servers.
+The recommended way to define servers is using a `servers.json` file.
 
-`MC_SERVER_<N>_KEY   = short keyword users type`
+### servers.json format:
 
-`MC_SERVER_<N>_NAME  = pretty name shown in Discord`
+```json
+[
+  {
+    "key": "surv",
+    "name": "Survival",
+    "id": "00000000-0000-0000-0000-000000000001"
+  },
+  {
+    "key": "crea",
+    "name": "Creative",
+    "id": "00000000-0000-0000-0000-000000000002"
+  }
+]
+```
 
-`MC_SERVER_<N>_ID    = server UUID from Crafty`
+Copy `servers.json.example` to `servers.json` and edit.
 
-### Example:
+### Alternate: Environment Variable
 
+You can also provide server definitions as a JSON string in the `MC_SERVERS_JSON` environment variable.
+
+### Legacy Method (Deprecated)
+
+Servers can be mapped by index using the following pattern:
+`MC_SERVER_<N>_KEY`, `MC_SERVER_<N>_NAME`, `MC_SERVER_<N>_ID`.
+
+Example:
 `MC_SERVER_1_KEY=surv`
-
 `MC_SERVER_1_NAME=Survival`
-
 `MC_SERVER_1_ID=00000000-0000-0000-0000-000000000001`
 
 ## Slash Command Usage
 
 ###
+
 In Discord: **/mc** <server> <action>
 
 #### Actions:
+
 - 📊 Status
 - ▶️ Start
 - ⏹️ Stop
@@ -178,16 +203,18 @@ Enable by exposing port 8085 in Docker if needed by your orchestrator.
 # Common Issues
 
 ## Commands not showing up
+
 - Ensure the bot has application.commands scope
 - If using GUILD_ID, the guild must match your server
 - Wait a few minutes for global command propagation
 
 ## “Unknown server”
+
 - Key/name mismatch between .env and command
 - Incorrect server UUID
 
 ### 401 / Crafty API failure
+
 - API token invalid
 - Crafty URL incorrect
 - HTTPS certificate issues if using self-signed certs
-
