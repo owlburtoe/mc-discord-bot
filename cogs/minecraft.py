@@ -112,6 +112,7 @@ class Minecraft(commands.Cog):
         ]
     )
     @app_commands.autocomplete(server=server_autocomplete)
+    @app_commands.checks.cooldown(1, 5.0, key=lambda i: (i.guild_id, i.user.id))
     async def mc_manager(
         self,
         interaction: discord.Interaction,
@@ -209,6 +210,22 @@ class Minecraft(commands.Cog):
             await interaction.followup.send(
                 embed=discord.Embed(title="💥 Communication failure", color=discord.Color.red())
             )
+
+    @mc_manager.error
+    async def mc_manager_error(
+        self, interaction: discord.Interaction, error: app_commands.AppCommandError
+    ):
+        if isinstance(error, app_commands.CommandOnCooldown):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="⌛ Slow down",
+                    description=f"Try again in `{error.retry_after:.1f}s`.",
+                    color=discord.Color.orange(),
+                ),
+                ephemeral=True,
+            )
+        else:
+            log.error("Command error: %s", error)
 
 
 async def setup(bot: commands.Bot):

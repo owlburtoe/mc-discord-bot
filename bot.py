@@ -23,9 +23,14 @@ class CraftyBot(commands.Bot):
     def __init__(self):
         intents = discord.Intents.default()
         super().__init__(command_prefix="!", intents=intents)
-        self.crafty = CraftyClient(settings.crafty_url, settings.crafty_token)
+        # self.crafty will be initialized in setup_hook as it's an awaitable call
 
     async def setup_hook(self):
+        # Initialize CraftyClient here as it's an awaitable call
+        self.crafty = await CraftyClient(
+            settings.crafty_url, settings.crafty_token, settings.crafty_verify_ssl
+        )
+
         # Load Cogs
         await self.load_extension("cogs.minecraft")
 

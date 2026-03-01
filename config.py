@@ -17,7 +17,8 @@ class Settings(BaseSettings):
 
     discord_token: str = Field(..., alias="DISCORD_TOKEN")
     guild_id: str | None = Field(None, alias="GUILD_ID")
-    allowed_channel_id: int = Field(0, alias="ALLOWED_CHANNEL_ID")
+    allowed_channel_id: int | None = Field(default=None, alias="ALLOWED_CHANNEL_ID")
+    crafty_verify_ssl: bool = Field(default=True, alias="CRAFTY_VERIFY_SSL")
     owner_id: int = Field(0, alias="OWNER_ID")
     mod_role_id: int = Field(0, alias="MOD_ROLE_ID")
 
