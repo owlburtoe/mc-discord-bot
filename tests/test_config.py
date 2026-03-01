@@ -1,8 +1,6 @@
-import os
 import json
-import pytest
-from pydantic import ValidationError
-from config import Settings, MinecraftServer
+
+from config import Settings
 
 
 def test_legacy_env_variables(monkeypatch):
@@ -18,7 +16,7 @@ def test_legacy_env_variables(monkeypatch):
     monkeypatch.setenv("MC_SERVER_2_NAME", "Modded")
 
     settings = Settings()
-    
+
     assert len(settings.servers) == 2
     assert "uuid-1" in settings.servers
     assert settings.servers["uuid-1"]["name"] == "Vanilla"
@@ -30,9 +28,9 @@ def test_json_env_variable(monkeypatch):
     """Test that MC_SERVERS_JSON takes precedence and parses correctly."""
     servers_data = [
         {"key": "json-id-1", "id": "json-id-1", "name": "JSON Server 1"},
-        {"key": "json-id-2", "id": "json-id-2", "name": "JSON Server 2"}
+        {"key": "json-id-2", "id": "json-id-2", "name": "JSON Server 2"},
     ]
-    
+
     monkeypatch.setenv("DISCORD_TOKEN", "test")
     monkeypatch.setenv("CRAFTY_URL", "http://test")
     monkeypatch.setenv("CRAFTY_TOKEN", "test")
@@ -51,7 +49,10 @@ def test_json_env_variable(monkeypatch):
 
 
 def test_invalid_json_env_variable(monkeypatch):
-    """Test that invalid JSON falls back to empty servers instead of crashing blindly if required fields are missing."""
+    """
+    Test that invalid JSON falls back to empty servers instead of crashing
+    blindly if required fields are missing.
+    """
     monkeypatch.setenv("DISCORD_TOKEN", "test")
     monkeypatch.setenv("CRAFTY_URL", "http://test")
     monkeypatch.setenv("CRAFTY_TOKEN", "test")
@@ -59,6 +60,6 @@ def test_invalid_json_env_variable(monkeypatch):
     monkeypatch.setenv("MC_SERVERS_JSON", json.dumps(moon_data))
 
     settings = Settings()
-    # It prints the error to stdout and falls back to other sources 
+    # It prints the error to stdout and falls back to other sources
     # (resulting in empty dict if no legacy vars exists)
     assert settings.servers == {}
