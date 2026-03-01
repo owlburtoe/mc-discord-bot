@@ -1,0 +1,182 @@
+import discord
+from discord import app_commands
+from discord.ext import commands
+import logging
+from crafty_api import CraftyClient
+from config import settings
+
+log = logging.getLogger("crafty-discord-bot.minecraft")
+
+class MinecraftControlView(discord.ui.View):
+    def __init__(self, cog: "Minecraft", server_id: str, server_name: str):
+        super().__init__(timeout=60)
+        self.cog = cog
+        self.server_id = server_id
+        self.server_name = server_name
+
+    async def _handle_action(self, interaction: discord.Interaction, action: str, verb: str, emoji: str):
+        if not await self.cog.validate_context(interaction, restricted=True):
+            return
+
+        await interaction.response.defer(thinking=True)
+        success = await self.cog.crafty.run_action(self.server_id, action)
+        
+        if success:
+            embed = discord.Embed(
+                title=f"{emoji} {verb} sent",
+                description=f"Command sent to **{self.server_name}**.",
+                color=discord.Color.blurple(),
+            )
+            await interaction.followup.send(embed=embed)
+        else:
+            await interaction.followup.send(embed=discord.Embed(title="⚠️ Crafty API error", color=discord.Color.orange()))
+
+    @discord.ui.button(label="Start", style=discord.ButtonStyle.green, emoji="🟢")
+    async def start_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._handle_action(interaction, "start_server", "Start", "🟢")
+
+    @discord.ui.button(label="Stop", style=discord.ButtonStyle.red, emoji="🛑")
+    async def stop_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._handle_action(interaction, "stop_server", "Stop", "🛑")
+
+    @discord.ui.button(label="Restart", style=discord.ButtonStyle.blurple, emoji="🔁")
+    async def restart_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        await self._handle_action(interaction, "restart_server", "Restart", "🔁")
+
+class Minecraft(commands.Cog):
+    def __init__(self, bot: commands.Bot, crafty: CraftyClient):
+        self.bot = bot
+        self.crafty = crafty
+        self.server_keys = settings.servers
+
+    async def is_mod(self, interaction: discord.Interaction) -> bool:
+        if interaction.user.id == settings.owner_id:
+            return True
+        if not interaction.guild:
+            return False
+        member = interaction.guild.get_member(interaction.user.id)
+        if not member:
+            return False
+        if settings.mod_role_id:
+            return any(role.id == settings.mod_role_id for role in member.roles)
+        return False
+
+    async def validate_context(self, interaction: discord.Interaction, restricted: bool = False):
+        if settings.allowed_channel_id and interaction.channel.id != settings.allowed_channel_id:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="🚫 Wrong channel",
+                    description=f"Use <#{settings.allowed_channel_id}> for this command.",
+                    color=discord.Color.red(),
+                ),
+                ephemeral=True,
+            )
+            return False
+
+        if restricted and not await self.is_mod(interaction):
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="⛔ Permission denied",
+                    description="You are not allowed to perform that action.",
+                    color=discord.Color.red(),
+                ),
+                ephemeral=True,
+            )
+            return False
+        return True
+
+    async def server_autocomplete(self, interaction: discord.Interaction, current: str):
+        choices = []
+        for key, entry in self.server_keys.items():
+            name = entry.get("name", key)
+            if current.lower() in name.lower():
+                choices.append(app_commands.Choice(name=name, value=name))
+        return choices[:25]
+
+    @app_commands.command(name="mc", description="Query or control Crafty Minecraft servers")
+    @app_commands.describe(server="Server name", action="Action to perform")
+    @app_commands.choices(
+        action=[
+            app_commands.Choice(name="📊 Status", value="status"),
+            app_commands.Choice(name="🟢 Start", value="start_server"),
+            app_commands.Choice(name="🛑 Stop", value="stop_server"),
+            app_commands.Choice(name="🔁 Restart", value="restart_server"),
+        ]
+    )
+    @app_commands.autocomplete(server=server_autocomplete)
+    async def mc_manager(
+        self,
+        interaction: discord.Interaction,
+        server: str,
+        action: app_commands.Choice[str],
+    ):
+        log.info("mc_ctl invoked | user=%s server=%s action=%s", interaction.user, server, action.value)
+        
+        is_admin_action = action.value != "status"
+        if not await self.validate_context(interaction, restricted=is_admin_action):
+            return
+
+        entry = next((v for v in self.server_keys.values() if v["name"].lower() == server.lower()), None)
+
+        if not entry:
+            await interaction.response.send_message(
+                embed=discord.Embed(
+                    title="❌ Unknown server",
+                    description=f"`{server}` was not found.",
+                    color=discord.Color.red(),
+                ),
+                ephemeral=True,
+            )
+            return
+
+        server_id = entry["id"]
+        server_display_name = entry["name"]
+        await interaction.response.defer(thinking=True)
+
+        try:
+            if action.value == "status":
+                data = await self.crafty.get_stats(server_id)
+                d = data.get("data", {})
+                running = d.get("running", False)
+                players_online = d.get("online", 0)
+                players_max = d.get("max", 0)
+                
+                # Extended stats if available
+                cpu = d.get("cpu", "N/A")
+                mem = d.get("memory", "N/A")
+                ver = d.get("version", "Unknown")
+
+                embed = discord.Embed(
+                    title=f"{'🟢' if running else '🔴'} {server_display_name}",
+                    description=f"Version: `{ver}`",
+                    color=discord.Color.green() if running else discord.Color.red(),
+                )
+                embed.add_field(name="Status", value=f"**{'ONLINE' if running else 'OFFLINE'}**", inline=True)
+                embed.add_field(name="Players", value=f"`{players_online}/{players_max}`", inline=True)
+                
+                if running:
+                    embed.add_field(name="CPU Usage", value=f"`{cpu}%`", inline=True)
+                    embed.add_field(name="Memory", value=f"`{mem}`", inline=True)
+
+                view = MinecraftControlView(self, server_id, server_display_name)
+                await interaction.followup.send(embed=embed, view=view)
+            else:
+                success = await self.crafty.run_action(server_id, action.value)
+                if success:
+                    emoji = {"start_server": "🟢", "stop_server": "🛑", "restart_server": "🔁"}.get(action.value, "⚙️")
+                    verb = {"start_server": "Start", "stop_server": "Stop", "restart_server": "Restart"}.get(action.value)
+                    embed = discord.Embed(
+                        title=f"{emoji} {verb} sent",
+                        description=f"Command sent to **{server_display_name}**.",
+                        color=discord.Color.blurple(),
+                    )
+                    await interaction.followup.send(embed=embed)
+                else:
+                    await interaction.followup.send(embed=discord.Embed(title="⚠️ Crafty API error", color=discord.Color.orange()))
+        except Exception:
+            log.exception("mc_ctl command failed")
+            await interaction.followup.send(embed=discord.Embed(title="💥 Communication failure", color=discord.Color.red()))
+
+async def setup(bot: commands.Bot):
+    # The bot will have the crafty client attached
+    await bot.add_cog(Minecraft(bot, bot.crafty))
