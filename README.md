@@ -88,6 +88,8 @@ Bring it online:
 docker compose up -d
 ```
 
+_Note: The bot uses a pre-built image from ghcr.io. If you prefer to build it locally, use `docker-compose-build.yml`._
+
 _bot won't run right away until all the required variables are entered. Crafty will run as long as PUID/GUID and TZ are entered in the .env_
 
 To view logs:

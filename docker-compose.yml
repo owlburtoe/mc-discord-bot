@@ -40,7 +40,7 @@ services:
 
   discord-bot:
     container_name: mc_discord_bot
-    image: owlburtoe/minecraft-crafty-discord-bot:latest
+    image: ghcr.io/owlburtoe/mc-discord-bot:main
     env_file: .env
     restart: unless-stopped
     networks:
