@@ -26,7 +26,14 @@ services:
       - ./crafty/config:/crafty/app/config
       - ./crafty/import:/crafty/import
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--no-check-certificate", "https://crafty:8443/api/v2"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "--no-check-certificate",
+          "https://crafty:8443/api/v2",
+        ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -40,3 +47,7 @@ services:
       - backend
     ports:
       - "8085:8080"
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true

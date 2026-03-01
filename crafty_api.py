@@ -1,11 +1,13 @@
-import aiohttp
 import logging
-from typing import Dict, Any, Optional
+from typing import Any
+
+import aiohttp
 
 log = logging.getLogger("crafty-discord-bot.api")
 
+
 class CraftyClient:
-    def __init__(self, url: str, token: str, session: Optional[aiohttp.ClientSession] = None):
+    def __init__(self, url: str, token: str, session: aiohttp.ClientSession | None = None):
         self.url = url.rstrip("/")
         self.token = token
         self._session = session
@@ -26,7 +28,7 @@ class CraftyClient:
         if self._own_session and self._session:
             await self._session.close()
 
-    async def get_stats(self, server_id: str) -> Dict[str, Any]:
+    async def get_stats(self, server_id: str) -> dict[str, Any]:
         url = f"{self.url}/servers/{server_id}/stats"
         session = await self._get_session()
         async with session.get(url, timeout=10) as r:

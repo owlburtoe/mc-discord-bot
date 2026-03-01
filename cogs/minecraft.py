@@ -1,11 +1,14 @@
+import logging
+
 import discord
 from discord import app_commands
 from discord.ext import commands
-import logging
-from crafty_api import CraftyClient
+
 from config import settings
+from crafty_api import CraftyClient
 
 log = logging.getLogger("crafty-discord-bot.minecraft")
+
 
 class MinecraftControlView(discord.ui.View):
     def __init__(self, cog: "Minecraft", server_id: str, server_name: str):
@@ -14,13 +17,15 @@ class MinecraftControlView(discord.ui.View):
         self.server_id = server_id
         self.server_name = server_name
 
-    async def _handle_action(self, interaction: discord.Interaction, action: str, verb: str, emoji: str):
+    async def _handle_action(
+        self, interaction: discord.Interaction, action: str, verb: str, emoji: str
+    ):
         if not await self.cog.validate_context(interaction, restricted=True):
             return
 
         await interaction.response.defer(thinking=True)
         success = await self.cog.crafty.run_action(self.server_id, action)
-        
+
         if success:
             embed = discord.Embed(
                 title=f"{emoji} {verb} sent",
@@ -29,7 +34,9 @@ class MinecraftControlView(discord.ui.View):
             )
             await interaction.followup.send(embed=embed)
         else:
-            await interaction.followup.send(embed=discord.Embed(title="⚠️ Crafty API error", color=discord.Color.orange()))
+            await interaction.followup.send(
+                embed=discord.Embed(title="⚠️ Crafty API error", color=discord.Color.orange())
+            )
 
     @discord.ui.button(label="Start", style=discord.ButtonStyle.green, emoji="🟢")
     async def start_button(self, interaction: discord.Interaction, button: discord.ui.Button):
@@ -42,6 +49,7 @@ class MinecraftControlView(discord.ui.View):
     @discord.ui.button(label="Restart", style=discord.ButtonStyle.blurple, emoji="🔁")
     async def restart_button(self, interaction: discord.Interaction, button: discord.ui.Button):
         await self._handle_action(interaction, "restart_server", "Restart", "🔁")
+
 
 class Minecraft(commands.Cog):
     def __init__(self, bot: commands.Bot, crafty: CraftyClient):
@@ -110,13 +118,20 @@ class Minecraft(commands.Cog):
         server: str,
         action: app_commands.Choice[str],
     ):
-        log.info("mc_ctl invoked | user=%s server=%s action=%s", interaction.user, server, action.value)
-        
+        log.info(
+            "mc_ctl invoked | user=%s server=%s action=%s",
+            interaction.user,
+            server,
+            action.value,
+        )
+
         is_admin_action = action.value != "status"
         if not await self.validate_context(interaction, restricted=is_admin_action):
             return
 
-        entry = next((v for v in self.server_keys.values() if v["name"].lower() == server.lower()), None)
+        entry = next(
+            (v for v in self.server_keys.values() if v["name"].lower() == server.lower()), None
+        )
 
         if not entry:
             await interaction.response.send_message(
@@ -140,7 +155,7 @@ class Minecraft(commands.Cog):
                 running = d.get("running", False)
                 players_online = d.get("online", 0)
                 players_max = d.get("max", 0)
-                
+
                 # Extended stats if available
                 cpu = d.get("cpu", "N/A")
                 mem = d.get("memory", "N/A")
@@ -151,9 +166,13 @@ class Minecraft(commands.Cog):
                     description=f"Version: `{ver}`",
                     color=discord.Color.green() if running else discord.Color.red(),
                 )
-                embed.add_field(name="Status", value=f"**{'ONLINE' if running else 'OFFLINE'}**", inline=True)
-                embed.add_field(name="Players", value=f"`{players_online}/{players_max}`", inline=True)
-                
+                embed.add_field(
+                    name="Status", value=f"**{'ONLINE' if running else 'OFFLINE'}**", inline=True
+                )
+                embed.add_field(
+                    name="Players", value=f"`{players_online}/{players_max}`", inline=True
+                )
+
                 if running:
                     embed.add_field(name="CPU Usage", value=f"`{cpu}%`", inline=True)
                     embed.add_field(name="Memory", value=f"`{mem}`", inline=True)
@@ -163,8 +182,16 @@ class Minecraft(commands.Cog):
             else:
                 success = await self.crafty.run_action(server_id, action.value)
                 if success:
-                    emoji = {"start_server": "🟢", "stop_server": "🛑", "restart_server": "🔁"}.get(action.value, "⚙️")
-                    verb = {"start_server": "Start", "stop_server": "Stop", "restart_server": "Restart"}.get(action.value)
+                    emoji = {
+                        "start_server": "🟢",
+                        "stop_server": "🛑",
+                        "restart_server": "🔁",
+                    }.get(action.value, "⚙️")
+                    verb = {
+                        "start_server": "Start",
+                        "stop_server": "Stop",
+                        "restart_server": "Restart",
+                    }.get(action.value)
                     embed = discord.Embed(
                         title=f"{emoji} {verb} sent",
                         description=f"Command sent to **{server_display_name}**.",
@@ -172,10 +199,17 @@ class Minecraft(commands.Cog):
                     )
                     await interaction.followup.send(embed=embed)
                 else:
-                    await interaction.followup.send(embed=discord.Embed(title="⚠️ Crafty API error", color=discord.Color.orange()))
+                    await interaction.followup.send(
+                        embed=discord.Embed(
+                            title="⚠️ Crafty API error", color=discord.Color.orange()
+                        )
+                    )
         except Exception:
             log.exception("mc_ctl command failed")
-            await interaction.followup.send(embed=discord.Embed(title="💥 Communication failure", color=discord.Color.red()))
+            await interaction.followup.send(
+                embed=discord.Embed(title="💥 Communication failure", color=discord.Color.red())
+            )
+
 
 async def setup(bot: commands.Bot):
     # The bot will have the crafty client attached

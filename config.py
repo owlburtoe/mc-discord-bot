@@ -1,19 +1,22 @@
 import json
-from typing import Dict, Optional, List, Any
-from pydantic import Field, RootModel
-from pydantic_settings import BaseSettings, SettingsConfigDict
 import os
+from typing import Any
+
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class MinecraftServer(BaseSettings):
     key: str
     name: str
     id: str
 
+
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     discord_token: str = Field(..., alias="DISCORD_TOKEN")
-    guild_id: Optional[str] = Field(None, alias="GUILD_ID")
+    guild_id: str | None = Field(None, alias="GUILD_ID")
     allowed_channel_id: int = Field(0, alias="ALLOWED_CHANNEL_ID")
     owner_id: int = Field(0, alias="OWNER_ID")
     mod_role_id: int = Field(0, alias="MOD_ROLE_ID")
@@ -23,12 +26,12 @@ class Settings(BaseSettings):
 
     log_level: str = Field("INFO", alias="LOG_LEVEL")
     log_json: bool = Field(False, alias="LOG_JSON")
-    
+
     servers_file: str = Field("servers.json", alias="SERVERS_FILE")
-    servers_json: Optional[str] = Field(None, alias="MC_SERVERS_JSON")
+    servers_json: str | None = Field(None, alias="MC_SERVERS_JSON")
 
     @property
-    def servers(self) -> Dict[str, Dict[str, str]]:
+    def servers(self) -> dict[str, dict[str, str]]:
         """
         Load server definitions from:
         1. MC_SERVERS_JSON environment variable
@@ -46,7 +49,7 @@ class Settings(BaseSettings):
         # 2. From JSON file
         if os.path.exists(self.servers_file):
             try:
-                with open(self.servers_file, "r") as f:
+                with open(self.servers_file) as f:
                     data = json.load(f)
                     return self._parse_json_list(data)
             except Exception as e:
@@ -66,10 +69,10 @@ class Settings(BaseSettings):
                 }
         return srvs
 
-    def _parse_json_list(self, data: Any) -> Dict[str, Dict[str, str]]:
+    def _parse_json_list(self, data: Any) -> dict[str, dict[str, str]]:
         if not isinstance(data, list):
             raise ValueError("Server configuration must be a list of objects")
-        
+
         parsed = {}
         for item in data:
             # Validate using Pydantic
@@ -79,5 +82,6 @@ class Settings(BaseSettings):
                 "id": srv.id,
             }
         return parsed
+
 
 settings = Settings()

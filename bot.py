@@ -1,7 +1,9 @@
-import discord
-from discord.ext import commands
-from aiohttp import web
 import logging
+
+import discord
+from aiohttp import web
+from discord.ext import commands
+
 from config import settings
 from crafty_api import CraftyClient
 
@@ -9,10 +11,10 @@ from crafty_api import CraftyClient
 # Logging
 # ======================
 logging.basicConfig(
-    level=settings.log_level,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+    level=settings.log_level, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 log = logging.getLogger("crafty-discord-bot")
+
 
 # ======================
 # Bot class
@@ -41,10 +43,12 @@ class CraftyBot(commands.Bot):
 
     async def start_health_server(self):
         async def health(_):
-            return web.json_response({
-                "status": "ok",
-                "servers": len(settings.servers),
-            })
+            return web.json_response(
+                {
+                    "status": "ok",
+                    "servers": len(settings.servers),
+                }
+            )
 
         app = web.Application()
         app.router.add_get("/health", health)
@@ -60,7 +64,9 @@ class CraftyBot(commands.Bot):
         await super().close()
         await self.crafty.close()
 
+
 bot = CraftyBot()
+
 
 # ======================
 # Events
@@ -68,6 +74,7 @@ bot = CraftyBot()
 @bot.event
 async def on_ready():
     log.info("Bot online | user=%s id=%s", bot.user, bot.user.id)
+
 
 # ======================
 # Entrypoint

@@ -33,7 +33,7 @@ This is a personal project shared publicly. I may not respond to issues or featu
   - No privileged intents are required for basic slash-command usage
 - Crafty Controller API Token
 - Crafty Controller URL
-- Python 3.11+ (for local runs) or Docker
+- Python 3.11+ and [uv](https://docs.astral.sh/uv/) (recommended for local runs) or Docker
 
 Crafty must have API access enabled.
 
@@ -102,7 +102,27 @@ docker compose logs -f
 
 - Visit [Crafty Controller](https://gitlab.com/crafty-controller/crafty-4) on GitLab for instructions on starting your first server!
 
-## Notes
+## Development
+
+This project uses [ruff](https://docs.astral.sh/ruff/) for lightning-fast linting and formatting.
+
+### 🧹 Linting
+
+To check for issues and automatically fix what's possible:
+
+```bash
+uv run ruff check --fix .
+```
+
+### ✨ Formatting
+
+To format the codebase:
+
+```bash
+uv run ruff format .
+```
+
+## License
 
 - You do not edit the container image
 - You update configuration only through .env
