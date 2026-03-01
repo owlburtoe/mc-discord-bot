@@ -48,8 +48,7 @@ Crafty must have API access enabled.
 Create a folder and go into it:
 
 ```bash
-mkdir mc-discord-bot
-cd mc-discord-bot
+mkdir mc-discord-bot && cd mc-discord-bot
 ```
 
 Download the Docker Compose file:
@@ -58,29 +57,31 @@ Download the Docker Compose file:
 wget -O docker-compose.yml https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/docker-compose.yml
 ```
 
-and
+and the environment template:
 
 ```bash
-wget -O example.env https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/example.env
-```
-
-Rename the environment file:
-
-```bash
-mv example.env .env
+wget -O .env https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/example.env
 ```
 
 ### Step 2 — Configure
 
-Open .env in your editor and populate it with your values:
+Open `.env` in your editor and populate it with your values:
 
-- PUID/GUID (_REQUIRED for Crafty to run!!_)
+- `PUID`/`PGID` (_REQUIRED for Crafty to run properly!!_)
 - Discord bot token
 - Crafty URL and token
-- server IDs
-- role / guild IDs (optional)
+
+Download the servers template:
+
+```bash
+wget -O servers.json https://raw.githubusercontent.com/owlburtoe/mc-discord-bot/main/servers.json.example
+```
+
+Open `servers.json` in your editor and define your servers.
 
 ### Step 3 — Start the bot
+
+The `docker-compose.yml` file is configured to automatically download the latest secure build directly from the **GitHub Container Registry (`ghcr.io`)**.
 
 Bring it online:
 
@@ -88,9 +89,9 @@ Bring it online:
 docker compose up -d
 ```
 
-_Note: The bot uses a pre-built image from ghcr.io. If you prefer to build it locally, use `docker-compose-build.yml`._
+_Note: If you are making modifications and prefer to build the bot locally from source rather than pulling the pre-built image, you can use `docker-compose-build.yml` instead._
 
-_bot won't run right away until all the required variables are entered. Crafty will run as long as PUID/GUID and TZ are entered in the .env_
+_The bot won't fully start until all the required variables in `.env` are entered. Crafty will begin to run as long as PUID/PGID and TZ are provided._
 
 To view logs:
 
