@@ -109,6 +109,7 @@ class Minecraft(commands.Cog):
             app_commands.Choice(name="🟢 Start", value="start_server"),
             app_commands.Choice(name="🛑 Stop", value="stop_server"),
             app_commands.Choice(name="🔁 Restart", value="restart_server"),
+            app_commands.Choice(name="🔧 Update Executable", value="update_executable"),
         ]
     )
     @app_commands.autocomplete(server=server_autocomplete)
@@ -187,11 +188,13 @@ class Minecraft(commands.Cog):
                         "start_server": "🟢",
                         "stop_server": "🛑",
                         "restart_server": "🔁",
+                        "update_executable": "🔧",
                     }.get(action.value, "⚙️")
                     verb = {
                         "start_server": "Start",
                         "stop_server": "Stop",
                         "restart_server": "Restart",
+                        "update_executable": "Update Executable",
                     }.get(action.value)
                     embed = discord.Embed(
                         title=f"{emoji} {verb} sent",
