@@ -27,7 +27,7 @@ class CraftyBot(commands.Bot):
 
     async def setup_hook(self):
         # Initialize CraftyClient here as it's an awaitable call
-        self.crafty = await CraftyClient(
+        self.crafty = CraftyClient(
             settings.crafty_url, settings.crafty_token, settings.crafty_verify_ssl
         )
 
