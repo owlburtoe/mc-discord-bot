@@ -22,6 +22,7 @@ FROM python:3.11-slim
 # Prevent Python from buffering logs
 ENV PYTHONUNBUFFERED=1
 ENV PATH="/home/botuser/.local/bin:${PATH}"
+ENV PYTHONPATH="/home/botuser/.local"
 
 WORKDIR /app
 
