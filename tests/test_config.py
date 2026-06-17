@@ -8,6 +8,7 @@ def test_legacy_env_variables(monkeypatch):
     monkeypatch.setenv("DISCORD_TOKEN", "test")
     monkeypatch.setenv("CRAFTY_URL", "http://test")
     monkeypatch.setenv("CRAFTY_TOKEN", "test")
+    monkeypatch.setenv("SERVERS_FILE", "/nonexistent/servers.json")
     monkeypatch.setenv("MC_SERVER_1_KEY", "uuid-1")
     monkeypatch.setenv("MC_SERVER_1_ID", "uuid-1")
     monkeypatch.setenv("MC_SERVER_1_NAME", "Vanilla")
@@ -56,6 +57,7 @@ def test_invalid_json_env_variable(monkeypatch):
     monkeypatch.setenv("DISCORD_TOKEN", "test")
     monkeypatch.setenv("CRAFTY_URL", "http://test")
     monkeypatch.setenv("CRAFTY_TOKEN", "test")
+    monkeypatch.setenv("SERVERS_FILE", "/nonexistent/servers.json")
     moon_data = [{"bad": "data"}]
     monkeypatch.setenv("MC_SERVERS_JSON", json.dumps(moon_data))
 
