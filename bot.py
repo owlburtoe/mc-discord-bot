@@ -6,6 +6,7 @@ from discord.ext import commands
 
 from config import settings
 from crafty_api import CraftyClient
+from server_registry import ServerRegistry
 
 # ======================
 # Logging
@@ -31,6 +32,10 @@ class CraftyBot(commands.Bot):
             settings.crafty_url, settings.crafty_token, settings.crafty_verify_ssl
         )
 
+        # Registry: live server list auto-discovered from Crafty
+        self.registry = ServerRegistry(self.crafty)
+        await self.initial_server_load()
+
         # Load Cogs
         await self.load_extension("cogs.minecraft")
 
@@ -46,12 +51,29 @@ class CraftyBot(commands.Bot):
             synced = await self.tree.sync()
             log.info("Synced %s global commands", len(synced))
 
+    async def initial_server_load(self):
+        """Populate the registry at startup.
+
+        Pull from Crafty first. If Crafty is unreachable and we have no cache, fall back
+        to the optional servers.json / MC_SERVERS_JSON seed so the bot is still usable
+        offline until the periodic refresh succeeds.
+        """
+        await self.registry.refresh()
+        if not self.registry.last_refresh_ok and not self.registry.servers:
+            seed = settings.servers
+            if seed:
+                log.warning(
+                    "Crafty unreachable at startup; seeding %d server(s) from file", len(seed)
+                )
+                self.registry.seed(seed)
+
     async def start_health_server(self):
         async def health(_):
             return web.json_response(
                 {
                     "status": "ok",
-                    "servers": len(settings.servers),
+                    "servers": len(self.registry.servers),
+                    "last_refresh_ok": self.registry.last_refresh_ok,
                 }
             )
 

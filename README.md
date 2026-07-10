@@ -17,6 +17,9 @@ This is a personal project shared publicly. I may not respond to issues or featu
   - Start
   - Stop
   - Restart
+  - Update Executable
+- **Auto-discovers servers from Crafty** — new servers appear in `/mc` automatically, no config edits or restarts
+- Announces newly added / removed servers in the configured channel
 - Supports multiple Minecraft servers
 - Optionally restricts which Discord roles can control servers
 - Works in a single Discord channel or globally
@@ -154,11 +157,27 @@ See example.env for a complete template.
 |  CRAFTY_URL  | Base URL of your Crafty Controller |
 | CRAFTY_TOKEN | API token made in Crafty           |
 
-## Defining Minecraft servers
+## Servers (auto-discovery)
 
-The recommended way to define servers is using a `servers.json` file.
+You do **not** need to define servers manually. The bot pulls the live server list
+from Crafty (`GET /servers`) on startup and re-checks every `REFRESH_INTERVAL_MINUTES`
+(default `5`). Any server you create in Crafty shows up in `/mc` on its own — Discord's
+autocomplete is evaluated live, so no slash-command re-sync or container restart is
+needed. Deleted servers drop off the list. New and removed servers are announced in
+`ALLOWED_CHANNEL_ID` if it is set.
 
-### servers.json format:
+| Variable                   | Description                                                     |
+| :------------------------: | :-------------------------------------------------------------- |
+| REFRESH_INTERVAL_MINUTES   | How often (minutes) to re-pull the server list. Default: `5`.   |
+
+If Crafty is briefly unreachable, the bot keeps serving the last-known list rather than
+going empty.
+
+### Optional offline fallback
+
+`servers.json` (or `MC_SERVERS_JSON`, or the legacy `MC_SERVER_<N>_*` variables) is now
+used **only as a seed** if Crafty is unreachable at startup. Once Crafty responds, its
+live list takes over. Most setups can leave these unset.
 
 ```json
 [
@@ -166,30 +185,9 @@ The recommended way to define servers is using a `servers.json` file.
     "key": "surv",
     "name": "Survival",
     "id": "00000000-0000-0000-0000-000000000001"
-  },
-  {
-    "key": "crea",
-    "name": "Creative",
-    "id": "00000000-0000-0000-0000-000000000002"
   }
 ]
 ```
-
-Copy `servers.json.example` to `servers.json` and edit.
-
-### Alternate: Environment Variable
-
-You can also provide server definitions as a JSON string in the `MC_SERVERS_JSON` environment variable.
-
-### Legacy Method (Deprecated)
-
-Servers can be mapped by index using the following pattern:
-`MC_SERVER_<N>_KEY`, `MC_SERVER_<N>_NAME`, `MC_SERVER_<N>_ID`.
-
-Example:
-`MC_SERVER_1_KEY=surv`
-`MC_SERVER_1_NAME=Survival`
-`MC_SERVER_1_ID=00000000-0000-0000-0000-000000000001`
 
 ## Slash Command Usage
 
@@ -204,7 +202,7 @@ In Discord: **/mc** <server> <action>
 - ⏹️ Stop
 - 🔁 Restart
 
-Server names match the values defined in your environment file.
+Server names match what they are called in Crafty.
 
 ## Health Check Endpoint (optional)
 
@@ -215,7 +213,8 @@ Response example:
 ```json
 {
   "status": "ok",
-  "servers": 3
+  "servers": 3,
+  "last_refresh_ok": true
 }
 ```
 
