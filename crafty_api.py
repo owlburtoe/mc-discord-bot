@@ -27,6 +27,27 @@ class CraftyClient:
             r.raise_for_status()
             return await r.json()
 
+    async def list_servers(self) -> list[dict[str, str]]:
+        """Fetch all servers visible to the token, normalized to {id, name}.
+
+        Entries missing a server_id are skipped; a missing name falls back to the id.
+        """
+        url = f"{self.url}/servers"
+        async with self.session.get(url, timeout=10) as r:
+            r.raise_for_status()
+            payload = await r.json()
+
+        servers = []
+        for entry in payload.get("data", []):
+            server_id = entry.get("server_id")
+            if not server_id:
+                log.warning("Skipping Crafty server entry without server_id: %s", entry)
+                continue
+            servers.append(
+                {"id": str(server_id), "name": entry.get("server_name") or str(server_id)}
+            )
+        return servers
+
     async def run_action(self, server_id: str, action: str) -> bool:
         url = f"{self.url}/servers/{server_id}/action/{action}"
         async with self.session.post(url, timeout=10) as r:

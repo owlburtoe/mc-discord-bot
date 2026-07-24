@@ -15,16 +15,16 @@ services:
     ports:
       - "8443:8443"
       - "8124:8124"
-      - "19132-19138:19132-19138/udp"
-      - "25500-25600:25500-25600"
+      - "19132-19140:19132-19140/udp"
+      - "25565-25575:25565-25575"
     networks:
       - backend
     volumes:
-      - ./crafty/backups:/crafty/backups
-      - ./crafty/logs:/crafty/logs
-      - ./crafty/servers:/crafty/servers
-      - ./crafty/config:/crafty/app/config
-      - ./crafty/import:/crafty/import
+      - /home/owlburtoe/docker/crafty/backups:/crafty/backups
+      - /home/owlburtoe/docker/crafty/logs:/crafty/logs
+      - /home/owlburtoe/docker/crafty/servers:/crafty/servers
+      - /home/owlburtoe/docker/crafty/config:/crafty/app/config
+      - /home/owlburtoe/docker/crafty/import:/crafty/import
     healthcheck:
       test:
         [

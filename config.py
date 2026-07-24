@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     servers_file: str = Field("servers.json", alias="SERVERS_FILE")
     servers_json: str | None = Field(None, alias="MC_SERVERS_JSON")
 
+    refresh_interval_minutes: int = Field(5, alias="REFRESH_INTERVAL_MINUTES")
+
     @property
     def servers(self) -> dict[str, dict[str, str]]:
         """

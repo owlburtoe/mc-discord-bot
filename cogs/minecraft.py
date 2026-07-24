@@ -2,10 +2,11 @@ import logging
 
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 
 from config import settings
 from crafty_api import CraftyClient
+from server_registry import ServerDiff, ServerRegistry
 
 log = logging.getLogger("crafty-discord-bot.minecraft")
 
@@ -52,10 +53,75 @@ class MinecraftControlView(discord.ui.View):
 
 
 class Minecraft(commands.Cog):
-    def __init__(self, bot: commands.Bot, crafty: CraftyClient):
+    def __init__(self, bot: commands.Bot, crafty: CraftyClient, registry: ServerRegistry):
         self.bot = bot
         self.crafty = crafty
-        self.server_keys = settings.servers
+        self.registry = registry
+        self.refresh_servers.change_interval(minutes=settings.refresh_interval_minutes)
+
+    async def cog_load(self):
+        # The periodic loop; its first tick diffs against the cache already populated
+        # by the startup refresh, so nothing is announced as "new" on boot.
+        self.refresh_servers.start()
+
+    async def cog_unload(self):
+        self.refresh_servers.cancel()
+
+    @property
+    def server_keys(self) -> dict[str, dict[str, str]]:
+        """Current server cache, keyed by Crafty UUID."""
+        return self.registry.servers
+
+    @tasks.loop(minutes=5)
+    async def refresh_servers(self):
+        diff = await self.registry.refresh()
+        if diff.has_changes:
+            await self._announce_changes(diff)
+
+    @refresh_servers.before_loop
+    async def _before_refresh(self):
+        await self.bot.wait_until_ready()
+
+    async def _announce_changes(self, diff: ServerDiff):
+        if not settings.allowed_channel_id:
+            log.info(
+                "Server changes detected (+%d/-%d) but ALLOWED_CHANNEL_ID is unset; skipping",
+                len(diff.added),
+                len(diff.removed),
+            )
+            return
+
+        channel = self.bot.get_channel(settings.allowed_channel_id)
+        if channel is None:
+            try:
+                channel = await self.bot.fetch_channel(settings.allowed_channel_id)
+            except Exception:
+                log.exception("Could not fetch ALLOWED_CHANNEL_ID for announcements")
+                return
+
+        for entry in diff.added:
+            try:
+                await channel.send(
+                    embed=discord.Embed(
+                        title="🆕 New server detected",
+                        description=f"**{entry['name']}** is now available in `/mc`.",
+                        color=discord.Color.green(),
+                    )
+                )
+            except Exception:
+                log.exception("Failed to announce new server %s", entry.get("name"))
+
+        for entry in diff.removed:
+            try:
+                await channel.send(
+                    embed=discord.Embed(
+                        title="➖ Server removed",
+                        description=f"**{entry['name']}** is no longer in Crafty.",
+                        color=discord.Color.dark_grey(),
+                    )
+                )
+            except Exception:
+                log.exception("Failed to announce removed server %s", entry.get("name"))
 
     async def is_mod(self, interaction: discord.Interaction) -> bool:
         if interaction.user.id == settings.owner_id:
@@ -232,5 +298,5 @@ class Minecraft(commands.Cog):
 
 
 async def setup(bot: commands.Bot):
-    # The bot will have the crafty client attached
-    await bot.add_cog(Minecraft(bot, bot.crafty))
+    # The bot will have the crafty client and registry attached
+    await bot.add_cog(Minecraft(bot, bot.crafty, bot.registry))

@@ -4,7 +4,15 @@ __pycache__/
 
 # Virtual env
 venv/
+
+# Secrets (any env variant)
 .env
+.env2
+.env.*
+*.env
 
 # Logs
 *.log
+
+# Claude Code local cache (machine-specific)
+.claude/tsc-cache/

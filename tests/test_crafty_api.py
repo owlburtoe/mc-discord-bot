@@ -76,3 +76,59 @@ async def test_run_action_failure(crafty_client, mocker):
     result = await crafty_client.run_action("test-server", "start_server")
 
     assert result is False
+
+
+@pytest.mark.asyncio
+async def test_list_servers_success(crafty_client, mocker):
+    """list_servers normalizes Crafty's data[] into {id, name} entries."""
+    mock_response = AsyncMock()
+    mock_response.json.return_value = {
+        "status": "ok",
+        "data": [
+            {"server_id": "uuid-1", "server_name": "Alpha", "extra": "ignored"},
+            {"server_id": "uuid-2", "server_name": "Beta"},
+        ],
+    }
+    mock_response.raise_for_status = MagicMock()
+
+    mock_get = mocker.patch("aiohttp.ClientSession.get")
+    mock_get.return_value.__aenter__.return_value = mock_response
+
+    result = await crafty_client.list_servers()
+
+    mock_get.assert_called_once_with("https://crafty.local/api/v2/servers", timeout=10)
+    assert result == [
+        {"id": "uuid-1", "name": "Alpha"},
+        {"id": "uuid-2", "name": "Beta"},
+    ]
+
+
+@pytest.mark.asyncio
+async def test_list_servers_skips_entries_without_id(crafty_client, mocker):
+    """Entries missing server_id are skipped; missing name falls back to the id."""
+    mock_response = AsyncMock()
+    mock_response.json.return_value = {
+        "status": "ok",
+        "data": [
+            {"server_name": "NoId"},
+            {"server_id": "uuid-3"},
+        ],
+    }
+    mock_response.raise_for_status = MagicMock()
+
+    mock_get = mocker.patch("aiohttp.ClientSession.get")
+    mock_get.return_value.__aenter__.return_value = mock_response
+
+    result = await crafty_client.list_servers()
+
+    assert result == [{"id": "uuid-3", "name": "uuid-3"}]
+
+
+@pytest.mark.asyncio
+async def test_list_servers_failure(crafty_client, mocker):
+    """list_servers lets ClientError bubble up."""
+    mock_get = mocker.patch("aiohttp.ClientSession.get")
+    mock_get.return_value.__aenter__.side_effect = ClientError("API unreachable")
+
+    with pytest.raises(ClientError):
+        await crafty_client.list_servers()
