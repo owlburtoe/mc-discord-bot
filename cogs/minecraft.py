@@ -128,7 +128,9 @@ class Minecraft(commands.Cog):
             return True
         if not interaction.guild:
             return False
-        member = interaction.guild.get_member(interaction.user.id)
+        member = interaction.user
+        if not isinstance(member, discord.Member):
+            member = interaction.guild.get_member(interaction.user.id)
         if not member:
             return False
         if settings.mod_role_id:
